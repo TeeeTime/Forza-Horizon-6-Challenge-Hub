@@ -734,6 +734,21 @@ body {
   font-weight: 600;
   color: var(--text-1);
 }
+.spec-item .val.country-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.spec-item .val .country-flag {
+  width: 20px;
+  height: 13px;
+}
+.history-country {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 .spec-item .sub {
   font-size: 0.72rem;
   color: var(--text-2);
