@@ -1,2 +1,4 @@
 # Forza Horizon 6 Challenge Hub
 Forza Horizon 6 Challenge Dashboard by Julius
+
+Use this on: https://teeetime.github.io/Forza-Horizon-6-Challenge-Hub/
