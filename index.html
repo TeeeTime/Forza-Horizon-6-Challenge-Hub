@@ -95,53 +95,44 @@
         </div>
 
         <div class="field">
-          <label class="field-label">PI Modus</label>
-          <div class="seg-control seg-3">
-            <button class="pi-btn active" data-pi-mode="exact">Exakt</button>
-            <button class="pi-btn" data-pi-mode="class">Klasse</button>
-            <button class="pi-btn" data-pi-mode="range">Spanne</button>
-          </div>
-          <div class="range-box" id="pi-exact-box">
-            <div class="range-labels">
-              <span>ZIEL-PI <strong id="pi-exact-val">700</strong></span>
-            </div>
-            <input type="range" id="pi-exact-input" min="100" max="999" value="700" step="1">
-          </div>
-          <div class="range-box hidden" id="pi-range-box">
-            <div class="range-labels">
-              <span>MIN <strong id="pi-min-val">300</strong></span>
-              <span>MAX <strong id="pi-max-val">900</strong></span>
-            </div>
-            <input type="range" id="pi-min-input" min="100" max="999" value="300" step="10">
-            <input type="range" id="pi-max-input" min="100" max="999" value="900" step="10">
-          </div>
-          <div class="class-box hidden" id="pi-class-box">
-            <div class="field-label-row">
-              <span class="class-box-hint">Aktive Klassen</span>
-              <button type="button" id="btn-toggle-classes" class="link-btn">Alle abwaehlen</button>
-            </div>
-            <div class="class-grid" id="class-checkboxes"></div>
-          </div>
-        </div>
-
-        <div class="field">
           <div class="field-label-row">
-            <label class="field-label">Laender</label>
-            <button id="btn-toggle-countries" class="link-btn">Alle abwaehlen</button>
+            <label class="field-label">Klassen</label>
+            <button type="button" id="btn-toggle-classes" class="link-btn">Alle abwaehlen</button>
           </div>
-          <div class="country-grid" id="country-checkboxes"></div>
+          <div class="class-grid" id="class-checkboxes"></div>
         </div>
 
-        <div class="field">
-          <label class="field-label">Reglement</label>
-          <div class="check-stack">
-            <label class="check-item"><input type="checkbox" id="chk-drivetrain" checked><span>Antriebsart</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-event" checked><span>Disziplin & Strecken</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-restriction" checked><span>Tuning-Reglement</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-era" checked><span>Baujahr & Epoche</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-weather"><span>Wetter & Tageszeit</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-tires"><span>Reifentyp</span></label>
-            <label class="check-item"><input type="checkbox" id="chk-assists"><span>Assists & Ansicht</span></label>
+        <div class="field field-foldable" id="fold-countries">
+          <div class="field-label-row">
+            <button type="button" class="field-fold-toggle" aria-expanded="true" aria-controls="fold-countries-body">
+              <span class="field-fold-arrow" aria-hidden="true"></span>
+              <span class="field-label">Laender</span>
+            </button>
+            <button type="button" id="btn-toggle-countries" class="link-btn field-fold-action">Alle abwaehlen</button>
+          </div>
+          <div class="field-fold-body" id="fold-countries-body">
+            <div class="country-grid" id="country-checkboxes"></div>
+          </div>
+        </div>
+
+        <div class="field field-foldable" id="fold-reglement">
+          <div class="field-label-row">
+            <button type="button" class="field-fold-toggle" aria-expanded="true" aria-controls="fold-reglement-body">
+              <span class="field-fold-arrow" aria-hidden="true"></span>
+              <span class="field-label">Reglement</span>
+            </button>
+            <button type="button" id="btn-toggle-reglement" class="link-btn field-fold-action">Alle abwaehlen</button>
+          </div>
+          <div class="field-fold-body" id="fold-reglement-body">
+            <div class="check-stack" id="reglement-checkboxes">
+              <label class="check-item"><input type="checkbox" id="chk-drivetrain" checked><span>Antriebsart</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-event" checked><span>Disziplin & Strecken</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-restriction" checked><span>Tuning-Reglement</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-era" checked><span>Baujahr & Epoche</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-weather"><span>Wetter & Tageszeit</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-tires"><span>Reifentyp</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-assists"><span>Assists & Ansicht</span></label>
+            </div>
           </div>
         </div>
       </aside>
@@ -309,6 +300,7 @@
     </div>
   </div>
 
+  <script src="js/forzaData.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
