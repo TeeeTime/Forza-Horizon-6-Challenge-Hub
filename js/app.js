@@ -1148,11 +1148,11 @@
         html += '<div class="spec-grid">';
 
         html += '<div class="spec-item"><span class="lbl">Herkunft & Marken</span>';
-        html += '<span class="val">' + c.country.name + ' [' + c.country.code + ']</span>';
-        html += '<span class="sub">z.B. ' + c.brand + '</span></div>';
+        html += '<span class="val country-val">' + self.escape(c.country.name) + ' ' + getCountryFlagMarkup(c.country.id) + '</span>';
+        html += '<span class="sub">z.B. ' + self.escape(c.brand) + '</span></div>';
 
         html += '<div class="spec-item"><span class="lbl">PI Target</span>';
-        html += '<span class="val" style="color:var(--accent);">' + c.pi.text + '</span></div>';
+        html += '<span class="pi-tag pi-tag-' + c.pi.code + '" style="align-self:flex-start;margin-top:2px;">' + c.pi.code + ' ' + c.pi.pi + '</span></div>';
 
         if (c.drivetrain) {
           html += '<div class="spec-item"><span class="lbl">Antrieb</span>';
@@ -1222,13 +1222,14 @@
         return;
       }
 
+      var self = this;
       this.historyList.innerHTML = this.history.map(function(h) {
         var c = h.results[0].challenge;
         var stagesLabel = c.stages && c.stages.length > 1 ? c.stages.length + '-Etappen Cup' : 'Einzel-Event';
         var modeLabel = h.mode === 'chaos' ? ' [Chaos]' : h.mode === 'escalation' ? ' [Eskalation]' : '';
         return '<div class="history-entry">' +
           '<div>' +
-            '<strong>' + c.country.name + ' [' + c.country.code + '] \u2014 ' + c.pi.text + '</strong>' +
+            '<strong class="history-country">' + self.escape(c.country.name) + ' ' + getCountryFlagMarkup(c.country.id) + ' \u2014 ' + c.pi.code + ' ' + c.pi.pi + '</strong>' +
             '<div class="muted">' + stagesLabel + ' (' + h.results.length + ' Spieler)' + modeLabel + '</div>' +
           '</div>' +
           '<span class="muted">' + h.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + '</span>' +
@@ -1247,7 +1248,7 @@
         var c = r.challenge;
         text += 'SPIELER: ' + r.player + '\n';
         text += 'LAND: ' + c.country.name + ' [' + c.country.code + '] (z.B. ' + c.brand + ')\n';
-        text += 'PI TARGET: ' + c.pi.text + '\n';
+        text += 'PI TARGET: ' + c.pi.code + ' ' + c.pi.pi + '\n';
         if (c.drivetrain) text += 'ANTRIEB: ' + c.drivetrain.name + ' (' + c.drivetrain.full + ')\n';
         if (c.era) text += 'EPOCHE: ' + c.era.name + '\n';
         if (c.restriction) text += 'REGLEMENT: ' + c.restriction.title + ' (' + c.restriction.desc + ')\n';
