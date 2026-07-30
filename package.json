@@ -1,0 +1,10 @@
+{
+  "name": "forza-horizon-challenge-hub",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Forza Horizon Challenge Generator & Roulette Hub",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}

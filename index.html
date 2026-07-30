@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forza Horizon 6 — Challenge Hub</title>
+  <meta name="description" content="Generiere faire Challenges fuer Forza Horizon 6 Multiplayer-Sessions mit Freunden.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="noise-layer"></div>
+
+  <div class="app-container">
+
+    <!-- ===== HEADER ===== -->
+    <header class="top-header">
+      <div class="brand-block">
+        <div class="brand-mark"></div>
+        <div class="brand-text">
+          <span class="brand-name">Forza Horizon 6</span>
+          <span class="brand-divider">/</span>
+          <span class="brand-sub">Challenge Hub</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-track-mgr" class="btn btn-ghost">Strecken-Editor</button>
+        <button id="toggle-audio" class="btn-icon" title="Sound">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.01,19.86 21,16.28 21,12C21,7.72 18.01,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.77 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>
+          </svg>
+        </button>
+        <button id="btn-show-rules" class="btn btn-ghost">Regeln</button>
+      </div>
+    </header>
+
+    <!-- ===== ACTION BAR ===== -->
+    <div class="action-bar">
+      <div class="action-bar-left">
+        <button id="btn-spin" class="btn btn-primary btn-spin">Challenge generieren</button>
+        <button id="btn-quick-spin" class="btn btn-ghost btn-quick">Schnell-Wurf</button>
+      </div>
+      <div class="preset-row">
+        <span class="preset-label">Presets</span>
+        <button class="btn-preset" data-preset="jdm">JDM Drift</button>
+        <button class="btn-preset" data-preset="autobahn">Autobahn</button>
+        <button class="btn-preset" data-preset="muscle">Muscle Drag</button>
+        <button class="btn-preset" data-preset="rallye">Offroad</button>
+        <button class="btn-preset" data-preset="touge">Touge Night</button>
+        <button class="btn-preset" data-preset="budget">Budget Build</button>
+      </div>
+    </div>
+
+    <!-- ===== 3-COLUMN WORKSPACE ===== -->
+    <main class="workspace">
+
+      <!-- LEFT: Settings -->
+      <aside class="panel panel-settings">
+        <div class="panel-head">
+          <h2>Parameter</h2>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Modus</label>
+          <div class="seg-control seg-4">
+            <button class="seg-btn active" data-mode="group">Gemeinsam</button>
+            <button class="seg-btn" data-mode="individual">VS</button>
+            <button class="seg-btn" data-mode="escalation">Eskalation</button>
+            <button class="seg-btn" data-mode="chaos">Chaos</button>
+          </div>
+        </div>
+
+        <div class="mode-hint" id="mode-hint">Alle Spieler: gleiches Land, gleiche Regeln.</div>
+
+        <div class="field">
+          <label class="field-label">Strecken-Quelle</label>
+          <div class="seg-control">
+            <button class="track-src active" data-source="custom">Eigene FH6</button>
+            <button class="track-src" data-source="generic">Vorlagen</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Events pro Auto</label>
+          <div class="seg-control seg-3">
+            <button class="stage-btn active" data-stages="1">1</button>
+            <button class="stage-btn" data-stages="3">3 Etappen</button>
+            <button class="stage-btn" data-stages="5">5 Etappen</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">PI Modus</label>
+          <div class="seg-control seg-3">
+            <button class="pi-btn active" data-pi-mode="exact">Exakt</button>
+            <button class="pi-btn" data-pi-mode="class">Klasse</button>
+            <button class="pi-btn" data-pi-mode="range">Spanne</button>
+          </div>
+          <div class="range-box" id="pi-exact-box">
+            <div class="range-labels">
+              <span>ZIEL-PI <strong id="pi-exact-val">700</strong></span>
+            </div>
+            <input type="range" id="pi-exact-input" min="100" max="999" value="700" step="1">
+          </div>
+          <div class="range-box hidden" id="pi-range-box">
+            <div class="range-labels">
+              <span>MIN <strong id="pi-min-val">300</strong></span>
+              <span>MAX <strong id="pi-max-val">900</strong></span>
+            </div>
+            <input type="range" id="pi-min-input" min="100" max="999" value="300" step="10">
+            <input type="range" id="pi-max-input" min="100" max="999" value="900" step="10">
+          </div>
+          <div class="class-box hidden" id="pi-class-box">
+            <div class="field-label-row">
+              <span class="class-box-hint">Aktive Klassen</span>
+              <button type="button" id="btn-toggle-classes" class="link-btn">Alle abwaehlen</button>
+            </div>
+            <div class="class-grid" id="class-checkboxes"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label">Laender</label>
+            <button id="btn-toggle-countries" class="link-btn">Alle abwaehlen</button>
+          </div>
+          <div class="country-grid" id="country-checkboxes"></div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Reglement</label>
+          <div class="check-stack">
+            <label class="check-item"><input type="checkbox" id="chk-drivetrain" checked><span>Antriebsart</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-event" checked><span>Disziplin & Strecken</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-restriction" checked><span>Tuning-Reglement</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-era" checked><span>Baujahr & Epoche</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-weather"><span>Wetter & Tageszeit</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-tires"><span>Reifentyp</span></label>
+            <label class="check-item"><input type="checkbox" id="chk-assists"><span>Assists & Ansicht</span></label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: Output -->
+      <section class="panel panel-center">
+        <div class="output-area" id="output-area">
+
+          <div class="idle-screen" id="idle-screen">
+            <div class="idle-dot"></div>
+            <h3>Bereit</h3>
+            <p>Klicke auf "Challenge generieren" um die Vorgaben zu berechnen.</p>
+          </div>
+
+          <div class="quick-result hidden" id="quick-result">
+            <div class="quick-result-label" id="quick-result-label"></div>
+            <div class="quick-result-value" id="quick-result-value"></div>
+          </div>
+
+          <div class="results-area hidden" id="results-area">
+            <div id="results-grid"></div>
+            <div class="result-actions">
+              <button id="btn-copy" class="btn btn-primary full-w">Text kopieren (Discord / WhatsApp)</button>
+              <button id="btn-reroll" class="btn btn-ghost">Neu wuerfeln</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="history-block">
+          <div class="panel-head">
+            <h3>Historie</h3>
+            <button id="btn-clear-history" class="link-btn">Leeren</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <span class="muted">Noch keine Eintraege.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Scoreboard -->
+      <aside class="panel panel-score">
+        <div class="panel-head">
+          <h2>Scoreboard</h2>
+          <span id="player-count" class="pill">2 Spieler</span>
+        </div>
+
+        <form id="add-player-form" class="player-form">
+          <input type="text" id="player-name-input" placeholder="Name..." maxlength="20" required>
+          <button type="submit" class="btn btn-primary">+</button>
+        </form>
+
+        <div class="player-list" id="player-table"></div>
+
+        <div class="panel-foot">
+          <button id="btn-podium" class="btn btn-ghost full-w">Siegerehrung</button>
+          <button id="btn-reset-scores" class="link-btn link-danger center">Punkte zuruecksetzen</button>
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container" class="toast-stack"></div>
+
+  <!-- ===== TRACK EDITOR MODAL ===== -->
+  <div id="track-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3>FH6 Strecken-Editor</h3>
+        <button id="btn-close-track" class="close-x">&times;</button>
+      </div>
+      <p class="modal-desc">Eigene FH6 Strecken oder EventLab-Codes eintragen. Der Generator nutzt exakt eure Vorgaben.</p>
+      <form id="add-track-form" class="stack">
+        <label class="field-label">Neue Strecke</label>
+        <div class="input-row">
+          <input type="text" id="input-track-name" placeholder="Name (z.B. Serpent Pass)..." required>
+          <input type="text" id="input-track-region" placeholder="Map-Region...">
+          <select id="input-track-type" class="select-input">
+            <option value="Driftzone">Driftzone</option>
+            <option value="Drag Race">Drag Race</option>
+            <option value="Rundstrecke">Rundstrecke</option>
+            <option value="Sprint">Sprint</option>
+            <option value="Offroad">Offroad / Rallye</option>
+            <option value="Cross Country">Cross Country</option>
+            <option value="PR-Stunt">PR-Stunt / Blitzer</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+          <button type="submit" class="btn btn-primary">+</button>
+        </div>
+      </form>
+      <div class="stack">
+        <label class="field-label">Bulk-Import (Format: Name | Region | Typ)</label>
+        <textarea id="bulk-track-input" rows="4" placeholder="Serpentine Pass | Nord-Westen | Driftzone&#10;Highway Pull | Mitte | Drag Race&#10;Stadt Circuit | Zentrum | Rundstrecke"></textarea>
+        <button id="btn-import-bulk" class="btn btn-ghost align-end">Importieren</button>
+      </div>
+      <div class="saved-block">
+        <div class="saved-top">
+          <span class="field-label">Gespeichert (<span id="track-count">0</span>)</span>
+          <div>
+            <button id="btn-load-official-tracks" class="link-btn" style="margin-right:10px; color:var(--text-2);">Standard-Events (128) laden</button>
+            <button id="btn-clear-tracks" class="link-btn link-danger">Alle loeschen</button>
+          </div>
+        </div>
+        <div id="custom-track-list" class="saved-list"></div>
+      </div>
+      <div class="modal-foot">
+        <button id="btn-close-track-ok" class="btn btn-primary">Fertig</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PODIUM MODAL ===== -->
+  <div id="podium-modal" class="modal-overlay hidden">
+    <div class="modal-box center">
+      <h3 class="modal-title">Siegerehrung</h3>
+      <div id="podium-content" class="podium-list"></div>
+      <button id="btn-close-podium" class="btn btn-primary">Weiter</button>
+    </div>
+  </div>
+
+  <!-- ===== RULES MODAL ===== -->
+  <div id="rules-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3>Regeln & Ablauf</h3>
+        <button id="btn-close-rules" class="close-x">&times;</button>
+      </div>
+      <ol class="rules-list">
+        <li><strong>Strecken eintragen:</strong> Oeffne den Editor und trage eure FH6 Strecken ein.</li>
+        <li><strong>Lobby:</strong> Fuege alle Spieler im Scoreboard hinzu.</li>
+        <li><strong>Modus waehlen:</strong> Gemeinsam (gleiche Regeln), VS (verschiedene Laender), Eskalation (PI steigt pro Runde), oder Chaos (alles zufaellig pro Spieler).</li>
+        <li><strong>Generieren:</strong> Klicke auf "Challenge generieren".</li>
+        <li><strong>Faires Match:</strong> Alle Spieler bauen auf das gleiche PI Target (ausser Chaos).</li>
+        <li><strong>Schnell-Wurf:</strong> Wuerfle schnell eine einzelne Kategorie fuer spontane Entscheidungen.</li>
+      </ol>
+      <div class="modal-foot">
+        <button id="btn-rules-ok" class="btn btn-primary">Verstanden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== QUICK SPIN MODAL ===== -->
+  <div id="quick-spin-modal" class="modal-overlay hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-top">
+        <h3>Schnell-Wurf</h3>
+        <button id="btn-close-quick" class="close-x">&times;</button>
+      </div>
+      <p class="modal-desc">Wuerfle schnell eine einzelne Kategorie fuer spontane Entscheidungen im Voice-Chat.</p>
+      <div class="quick-grid">
+        <button class="quick-cat" data-cat="country">Land</button>
+        <button class="quick-cat" data-cat="pi">PI-Zahl</button>
+        <button class="quick-cat" data-cat="drivetrain">Antrieb</button>
+        <button class="quick-cat" data-cat="era">Epoche</button>
+        <button class="quick-cat" data-cat="restriction">Reglement</button>
+        <button class="quick-cat" data-cat="weather">Wetter</button>
+        <button class="quick-cat" data-cat="tires">Reifen</button>
+        <button class="quick-cat" data-cat="track">Strecke</button>
+      </div>
+      <div class="quick-output" id="quick-spin-output">
+        <span class="muted">Klicke eine Kategorie...</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
