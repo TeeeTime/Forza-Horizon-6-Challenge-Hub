@@ -433,13 +433,16 @@
     var results = [];
 
     if (mode === 'chaos') {
-      // CHAOS: same parameter selection as other modes, rolled independently per player
+      // CHAOS: independent rules per player, but shared events/stages
+      var sharedStages = generateBaseRules(opts).stages;
       var shuffledCountries = availableCountries.slice().sort(function() { return 0.5 - Math.random(); });
       players.forEach(function(p, idx) {
+        var playerRules = generateBaseRules(opts);
+        playerRules.stages = sharedStages;
         results.push({
           player: p,
           playerIndex: idx,
-          challenge: buildChallenge(shuffledCountries[idx % shuffledCountries.length], generateBaseRules(opts))
+          challenge: buildChallenge(shuffledCountries[idx % shuffledCountries.length], playerRules)
         });
       });
       return results;
