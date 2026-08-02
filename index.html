@@ -213,13 +213,17 @@
           <input type="text" id="input-track-name" placeholder="Name (z.B. Serpent Pass)..." required>
           <input type="text" id="input-track-region" placeholder="Map-Region...">
           <select id="input-track-type" class="select-input">
-            <option value="Driftzone">Driftzone</option>
+            <option value="Street">Street</option>
+            <option value="Track">Track</option>
+            <option value="Touge">Touge</option>
+            <option value="Dirt">Dirt</option>
+            <option value="Crosscountry">Crosscountry</option>
             <option value="Drag Race">Drag Race</option>
-            <option value="Rundstrecke">Rundstrecke</option>
-            <option value="Sprint">Sprint</option>
-            <option value="Offroad">Offroad / Rallye</option>
-            <option value="Cross Country">Cross Country</option>
-            <option value="PR-Stunt">PR-Stunt / Blitzer</option>
+            <option value="Driftzone">Driftzone</option>
+            <option value="Jump">Jump</option>
+            <option value="Speedtrap">Speedtrap</option>
+            <option value="Trailblazer">Trailblazer</option>
+            <option value="Speedzone">Speedzone</option>
             <option value="Sonstiges">Sonstiges</option>
           </select>
           <button type="submit" class="btn btn-primary">+</button>
@@ -227,14 +231,14 @@
       </form>
       <div class="stack">
         <label class="field-label">Bulk-Import (Format: Name | Region | Typ)</label>
-        <textarea id="bulk-track-input" rows="4" placeholder="Serpentine Pass | Nord-Westen | Driftzone&#10;Highway Pull | Mitte | Drag Race&#10;Stadt Circuit | Zentrum | Rundstrecke"></textarea>
+        <textarea id="bulk-track-input" rows="4" placeholder="Serpentine Pass | Nord-Westen | Touge&#10;Highway Pull | Mitte | Drag Race&#10;Festival Leap | Ohtani | Jump&#10;Ito Straight | Ito | Speedtrap"></textarea>
         <button id="btn-import-bulk" class="btn btn-ghost align-end">Importieren</button>
       </div>
       <div class="saved-block">
         <div class="saved-top">
           <span class="field-label">Gespeichert (<span id="track-count">0</span>)</span>
           <div>
-            <button id="btn-load-official-tracks" class="link-btn" style="margin-right:10px; color:var(--text-2);">Standard-Events (128) laden</button>
+            <button id="btn-load-official-tracks" class="link-btn" style="margin-right:10px; color:var(--text-2);">Standard-Events (192) laden</button>
             <button id="btn-clear-tracks" class="link-btn link-danger">Alle loeschen</button>
           </div>
         </div>

@@ -764,11 +764,84 @@ body {
   gap: 3px;
 }
 
+.event-block-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
 .event-block .ev-name {
   font-weight: 600;
   font-size: 0.82rem;
   color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
+
+.event-block .ev-type {
+  font-size: 0.68rem;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.event-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  color: var(--accent);
+  line-height: 0;
+}
+.event-type-icon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+.saved-track-row {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.saved-track-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.saved-track-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.saved-track-title strong {
+  font-size: 0.78rem;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-type-label {
+  font-size: 0.68rem;
+  color: var(--accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.saved-track-region {
+  font-size: 0.7rem;
+  color: var(--text-3);
+}
+
 .event-block .ev-track {
   font-size: 0.85rem;
   font-weight: 600;
