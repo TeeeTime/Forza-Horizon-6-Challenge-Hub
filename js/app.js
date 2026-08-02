@@ -154,7 +154,7 @@
       var cleanName = name.trim();
       if (!cleanName) return false;
       var cleanRegion = (region || 'Map-Position').trim();
-      var cleanType = (type || 'Rundstrecke').trim();
+      var cleanType = (type || 'Track').trim();
       this.customTracks.push({ name: cleanName, mapRegion: cleanRegion, type: cleanType });
       this._save();
       return true;
@@ -180,14 +180,19 @@
 
     cleanRawType(rawType, name) {
       if (!rawType) return this.detectTrackType(name);
-      var t = rawType.toLowerCase();
+      var t = rawType.toLowerCase().replace(/\s+/g, '');
       if (t.indexOf('drift') !== -1) return 'Driftzone';
       if (t.indexOf('drag') !== -1 || t.indexOf('pull') !== -1 || t.indexOf('0-300') !== -1 || t.indexOf('viertelmeile') !== -1) return 'Drag Race';
-      if (t.indexOf('rund') !== -1 || t.indexOf('circuit') !== -1 || t.indexOf('colossus') !== -1 || t.indexOf('goliath') !== -1) return 'Rundstrecke';
-      if (t.indexOf('sprint') !== -1 || t.indexOf('etappe') !== -1 || t.indexOf('touge') !== -1 || t.indexOf('street') !== -1) return 'Sprint';
-      if (t.indexOf('querfeldein') !== -1 || t.indexOf('cross') !== -1) return 'Cross Country';
-      if (t.indexOf('rally') !== -1 || t.indexOf('dirt') !== -1 || t.indexOf('trail') !== -1 || t.indexOf('scramble') !== -1 || t.indexOf('gauntlet') !== -1) return 'Offroad';
-      if (t.indexOf('gefahren') !== -1 || t.indexOf('blitzer') !== -1 || t.indexOf('tempo') !== -1 || t.indexOf('stunt') !== -1 || t.indexOf('jump') !== -1) return 'PR-Stunt';
+      if (t.indexOf('trailblazer') !== -1) return 'Trailblazer';
+      if (t.indexOf('speedtrap') !== -1 || t.indexOf('blitzer') !== -1 || t.indexOf('speedcamera') !== -1) return 'Speedtrap';
+      if (t.indexOf('speedzone') !== -1) return 'Speedzone';
+      if (t.indexOf('jump') !== -1 || t.indexOf('gefahren') !== -1 || t.indexOf('sprung') !== -1) return 'Jump';
+      if (t.indexOf('touge') !== -1) return 'Touge';
+      if (t.indexOf('street') !== -1 || t.indexOf('strasse') !== -1) return 'Street';
+      if (t.indexOf('cross') !== -1 || t.indexOf('querfeldein') !== -1) return 'Crosscountry';
+      if (t.indexOf('dirt') !== -1 || t.indexOf('rally') !== -1 || t.indexOf('offroad') !== -1 || t.indexOf('scramble') !== -1 || t.indexOf('gauntlet') !== -1 || t === 'trail') return 'Dirt';
+      if (t.indexOf('track') !== -1 || t.indexOf('rund') !== -1 || t.indexOf('circuit') !== -1 || t.indexOf('sprint') !== -1 || t.indexOf('colossus') !== -1 || t.indexOf('goliath') !== -1) return 'Track';
+      if (t.indexOf('stunt') !== -1 || t.indexOf('pr-stunt') !== -1 || t.indexOf('prstunt') !== -1) return 'Jump';
       return this.detectTrackType(name);
     }
 
@@ -195,11 +200,15 @@
       var n = name.toLowerCase();
       if (n.indexOf('drift') !== -1) return 'Driftzone';
       if (n.indexOf('drag') !== -1 || n.indexOf('pull') !== -1 || n.indexOf('0-300') !== -1 || n.indexOf('viertelmeile') !== -1) return 'Drag Race';
-      if (n.indexOf('sprint') !== -1 || n.indexOf('etappe') !== -1) return 'Sprint';
-      if (n.indexOf('offroad') !== -1 || n.indexOf('rally') !== -1 || n.indexOf('schotter') !== -1 || n.indexOf('dirt') !== -1) return 'Offroad';
-      if (n.indexOf('cross') !== -1) return 'Cross Country';
-      if (n.indexOf('speed') !== -1 || n.indexOf('blitzer') !== -1 || n.indexOf('sprung') !== -1 || n.indexOf('jump') !== -1) return 'PR-Stunt';
-      return 'Rundstrecke';
+      if (n.indexOf('trailblazer') !== -1) return 'Trailblazer';
+      if (n.indexOf('speedtrap') !== -1 || n.indexOf('blitzer') !== -1) return 'Speedtrap';
+      if (n.indexOf('speedzone') !== -1 || n.indexOf('speed zone') !== -1) return 'Speedzone';
+      if (n.indexOf('jump') !== -1 || n.indexOf('leap') !== -1 || n.indexOf('launch') !== -1 || n.indexOf('sprung') !== -1) return 'Jump';
+      if (n.indexOf('touge') !== -1) return 'Touge';
+      if (n.indexOf('street') !== -1) return 'Street';
+      if (n.indexOf('cross') !== -1) return 'Crosscountry';
+      if (n.indexOf('offroad') !== -1 || n.indexOf('rally') !== -1 || n.indexOf('schotter') !== -1 || n.indexOf('dirt') !== -1 || n.indexOf('scramble') !== -1 || n.indexOf('gauntlet') !== -1) return 'Dirt';
+      return 'Track';
     }
 
     importBulk(text) {
@@ -318,11 +327,10 @@
         usedDisciplines[disc.id] = true;
 
         var matchingTracks = lobby.customTracks.filter(function(ct) {
-          var t = (ct.type || '').toLowerCase();
-          var dId = disc.id.toLowerCase();
-          var dName = disc.name.toLowerCase();
-          var dTypeLabel = disc.typeLabel.toLowerCase();
-          return t.indexOf(dId) !== -1 || dName.indexOf(t) !== -1 || t.indexOf(dTypeLabel) !== -1;
+          var t = (ct.type || '').toLowerCase().replace(/\s+/g, '');
+          var dId = disc.id.toLowerCase().replace(/\s+/g, '');
+          var dTypeLabel = (disc.typeLabel || '').toLowerCase().replace(/\s+/g, '');
+          return t === dTypeLabel || t === dId || t.indexOf(dId) !== -1 || dTypeLabel.indexOf(t) !== -1;
         });
 
         var unusedMatching = matchingTracks.filter(function(ct) {
@@ -691,7 +699,7 @@
         e.preventDefault();
         var name = self.inputTrackName.value;
         var region = self.inputTrackRegion.value;
-        var type = self.inputTrackType ? self.inputTrackType.value : 'Rundstrecke';
+        var type = self.inputTrackType ? self.inputTrackType.value : 'Track';
         if (lobby.addCustomTrack(name, region, type)) {
           audio.click();
           self.inputTrackName.value = '';
