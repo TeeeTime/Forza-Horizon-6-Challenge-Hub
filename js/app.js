@@ -271,6 +271,22 @@
     return FORZA_DATA.playerColors[index % FORZA_DATA.playerColors.length];
   }
 
+  function getEventTypeIconMarkup(type) {
+    if (!type || typeof EVENT_TYPE_ICONS === 'undefined') return '';
+    var key = String(type).trim();
+    var aliases = {
+      Drift: 'Driftzone',
+      'Cross Country': 'Crosscountry',
+      Race: 'Track',
+      Speedcamera: 'Speedtrap',
+      'PR-Stunt': 'Jump'
+    };
+    var resolved = EVENT_TYPE_ICONS[key] ? key : (aliases[key] || key);
+    var svg = EVENT_TYPE_ICONS[resolved];
+    if (!svg) return '';
+    return '<span class="event-type-icon" title="' + key.replace(/"/g, '&quot;') + '">' + svg + '</span>';
+  }
+
   var COUNTRY_FLAG_SVG = {
     de: '<svg viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="24" height="5.33" y="0" fill="#000"/><rect width="24" height="5.33" y="5.33" fill="#D00"/><rect width="24" height="5.34" y="10.66" fill="#FFCE00"/></svg>',
     jp: '<svg viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="24" height="16" fill="#fff"/><circle cx="12" cy="8" r="4.2" fill="#BC002D"/></svg>',
@@ -930,11 +946,12 @@
 
       var self = this;
       this.customTrackListEl.innerHTML = tracks.map(function(t, idx) {
-        var typeBadge = t.type ? '<span style="font-size:0.68rem; color:var(--accent); font-weight:600; margin-left:6px;">[' + self.escape(t.type) + ']</span>' : '';
-        return '<div style="background:var(--bg-inset); border:1px solid var(--border-dim); padding:6px 10px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">' +
-          '<div style="display:flex; flex-direction:column;">' +
-            '<div><strong style="font-size:0.78rem; color:var(--text-1);">' + self.escape(t.name) + '</strong>' + typeBadge + '</div>' +
-            '<span style="font-size:0.7rem; color:var(--text-3);">' + self.escape(t.mapRegion) + '</span>' +
+        var icon = getEventTypeIconMarkup(t.type);
+        var typeBadge = t.type ? '<span class="track-type-label">[' + self.escape(t.type) + ']</span>' : '';
+        return '<div class="saved-track-row">' +
+          '<div class="saved-track-main">' +
+            '<div class="saved-track-title">' + icon + '<strong>' + self.escape(t.name) + '</strong>' + typeBadge + '</div>' +
+            '<span class="saved-track-region">' + self.escape(t.mapRegion) + '</span>' +
           '</div>' +
           '<button class="del-btn" data-index="' + idx + '">&times;</button>' +
         '</div>';
@@ -1205,13 +1222,14 @@
           html += '<span class="stages-label">' + (c.stages.length > 1 ? 'Cup Etappen (' + c.stages.length + ' Events)' : 'Renn-Strecke') + '</span>';
 
           c.stages.forEach(function(st) {
+            var icon = getEventTypeIconMarkup(st.typeLabel);
             html += '<div class="event-block">';
-            html += '<div style="display:flex; justify-content:space-between; align-items:baseline;">';
-            html += '<span class="ev-name">' + (c.stages.length > 1 ? 'Etappe ' + st.stageNum + ': ' : '') + st.name + '</span>';
-            html += '<span style="font-size:0.68rem; color:var(--text-3);">' + st.typeLabel + '</span>';
+            html += '<div class="event-block-top">';
+            html += '<span class="ev-name">' + icon + (c.stages.length > 1 ? 'Etappe ' + st.stageNum + ': ' : '') + self.escape(st.name) + '</span>';
+            html += '<span class="ev-type">' + self.escape(st.typeLabel || '') + '</span>';
             html += '</div>';
-            html += '<div class="ev-track">' + st.trackName + '</div>';
-            if (st.mapRegion) { html += '<div class="ev-region">Region: ' + st.mapRegion + '</div>'; }
+            html += '<div class="ev-track">' + self.escape(st.trackName) + '</div>';
+            if (st.mapRegion) { html += '<div class="ev-region">Region: ' + self.escape(st.mapRegion) + '</div>'; }
             html += '</div>';
           });
 
