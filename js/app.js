@@ -315,6 +315,22 @@
     return validClasses.length > 0 ? validClasses : FORZA_DATA.classes;
   }
 
+  function getSelectedDisciplines(opts) {
+    var enabled = opts.selectedEventTypes || [];
+    if (!enabled.length) return FORZA_DATA.disciplines.slice();
+    var filtered = FORZA_DATA.disciplines.filter(function(d) {
+      return enabled.indexOf(d.id) !== -1;
+    });
+    return filtered.length > 0 ? filtered : FORZA_DATA.disciplines.slice();
+  }
+
+  function trackMatchesDiscipline(ct, disc) {
+    var t = (ct.type || '').toLowerCase().replace(/\s+/g, '');
+    var dId = disc.id.toLowerCase().replace(/\s+/g, '');
+    var dTypeLabel = (disc.typeLabel || '').toLowerCase().replace(/\s+/g, '');
+    return t === dTypeLabel || t === dId || t.indexOf(dId) !== -1 || dTypeLabel.indexOf(t) !== -1;
+  }
+
   function generateBaseRules(opts) {
     var piObj;
     if (opts.exactPi != null) {
@@ -332,21 +348,19 @@
     var useUserTracks = opts.trackSource === 'custom' && lobby.customTracks.length > 0;
     var usedTrackNames = {};
     var usedDisciplines = {};
+    var disciplinePool = getSelectedDisciplines(opts);
 
     for (var i = 0; i < stageCount; i++) {
-      if (useUserTracks) {
-        var availableDisciplines = FORZA_DATA.disciplines.filter(function(d) {
-          return !usedDisciplines[d.id];
-        });
-        if (availableDisciplines.length === 0) availableDisciplines = FORZA_DATA.disciplines;
-        var disc = randElem(availableDisciplines);
-        usedDisciplines[disc.id] = true;
+      var availableDisciplines = disciplinePool.filter(function(d) {
+        return !usedDisciplines[d.id];
+      });
+      if (availableDisciplines.length === 0) availableDisciplines = disciplinePool;
+      var disc = randElem(availableDisciplines);
+      usedDisciplines[disc.id] = true;
 
+      if (useUserTracks) {
         var matchingTracks = lobby.customTracks.filter(function(ct) {
-          var t = (ct.type || '').toLowerCase().replace(/\s+/g, '');
-          var dId = disc.id.toLowerCase().replace(/\s+/g, '');
-          var dTypeLabel = (disc.typeLabel || '').toLowerCase().replace(/\s+/g, '');
-          return t === dTypeLabel || t === dId || t.indexOf(dId) !== -1 || dTypeLabel.indexOf(t) !== -1;
+          return trackMatchesDiscipline(ct, disc);
         });
 
         var unusedMatching = matchingTracks.filter(function(ct) {
@@ -357,29 +371,42 @@
         if (unusedMatching.length > 0) {
           chosenTrack = randElem(unusedMatching);
         } else {
-          var unusedAny = lobby.customTracks.filter(function(ct) {
+          var poolTracks = lobby.customTracks.filter(function(ct) {
+            return disciplinePool.some(function(d) { return trackMatchesDiscipline(ct, d); });
+          });
+          var unusedPool = poolTracks.filter(function(ct) {
             return !usedTrackNames[ct.name];
           });
-          chosenTrack = unusedAny.length > 0 ? randElem(unusedAny) : (matchingTracks.length > 0 ? randElem(matchingTracks) : randElem(lobby.customTracks));
+          if (unusedPool.length > 0) {
+            chosenTrack = randElem(unusedPool);
+          } else if (matchingTracks.length > 0) {
+            chosenTrack = randElem(matchingTracks);
+          } else if (poolTracks.length > 0) {
+            chosenTrack = randElem(poolTracks);
+          } else {
+            chosenTrack = null;
+          }
         }
 
-        usedTrackNames[chosenTrack.name] = true;
-
-        stages.push({
-          stageNum: i + 1,
-          name: chosenTrack.name,
-          typeLabel: chosenTrack.type || disc.typeLabel,
-          trackName: chosenTrack.name,
-          mapRegion: chosenTrack.mapRegion
-        });
+        if (chosenTrack) {
+          usedTrackNames[chosenTrack.name] = true;
+          stages.push({
+            stageNum: i + 1,
+            name: chosenTrack.name,
+            typeLabel: chosenTrack.type || disc.typeLabel,
+            trackName: chosenTrack.name,
+            mapRegion: chosenTrack.mapRegion
+          });
+        } else {
+          stages.push({
+            stageNum: i + 1,
+            name: disc.name,
+            typeLabel: disc.typeLabel,
+            trackName: disc.hint,
+            mapRegion: ''
+          });
+        }
       } else {
-        var availableDisciplines = FORZA_DATA.disciplines.filter(function(d) {
-          return !usedDisciplines[d.id];
-        });
-        if (availableDisciplines.length === 0) availableDisciplines = FORZA_DATA.disciplines;
-        var disc = randElem(availableDisciplines);
-        usedDisciplines[disc.id] = true;
-
         stages.push({
           stageNum: i + 1,
           name: disc.name,
@@ -515,6 +542,7 @@
       this.trackSource = 'custom';
       this.selectedCountries = FORZA_DATA.countries.map(function(c) { return c.id; });
       this.selectedClasses = FORZA_DATA.classes.map(function(c) { return c.code; });
+      this.selectedEventTypes = FORZA_DATA.disciplines.map(function(d) { return d.id; });
       this.history = [];
       this.lastSession = null;
 
@@ -525,6 +553,7 @@
       this.bindEvents();
       this.renderCountries();
       this.renderClasses();
+      this.renderEventTypes();
       this.renderLobby();
       this.renderCustomTracks();
     }
@@ -543,6 +572,8 @@
       this.btnToggleCountries = document.getElementById('btn-toggle-countries');
       this.btnToggleReglement = document.getElementById('btn-toggle-reglement');
       this.reglementStack = document.getElementById('reglement-checkboxes');
+      this.btnToggleEventTypes = document.getElementById('btn-toggle-event-types');
+      this.eventTypeStack = document.getElementById('event-type-checkboxes');
 
       this.btnPodium = document.getElementById('btn-podium');
       this.podiumModal = document.getElementById('podium-modal');
@@ -686,6 +717,15 @@
         chk.addEventListener('change', function() { self.syncReglementToggleLabel(); });
       });
       this.syncReglementToggleLabel();
+
+      // Event type toggle all
+      this.btnToggleEventTypes.addEventListener('click', function() {
+        audio.click();
+        var chks = self.eventTypeStack.querySelectorAll('input[type="checkbox"]');
+        var allChecked = Array.from(chks).every(function(c) { return c.checked; });
+        chks.forEach(function(c) { c.checked = !allChecked; });
+        self.updateEventTypes();
+      });
 
       // Foldable parameter sections
       document.querySelectorAll('.field-foldable').forEach(function(section) {
@@ -1003,6 +1043,34 @@
       this.btnToggleReglement.textContent = allOn ? 'Alle abwaehlen' : 'Alle auswaehlen';
     }
 
+    // --- EVENT TYPES ---
+    renderEventTypes() {
+      var self = this;
+      this.eventTypeStack.innerHTML = FORZA_DATA.disciplines.map(function(d) {
+        var on = self.selectedEventTypes.indexOf(d.id) !== -1;
+        return '<label class="event-type-chk">' +
+          '<input type="checkbox" value="' + d.id + '"' + (on ? ' checked' : '') + '>' +
+          '<span class="event-type-name">' + d.typeLabel + '</span>' +
+          getEventTypeIconMarkup(d.typeLabel) +
+        '</label>';
+      }).join('');
+
+      this.eventTypeStack.querySelectorAll('input[type="checkbox"]').forEach(function(chk) {
+        chk.addEventListener('change', function() { self.updateEventTypes(); });
+      });
+      this.syncEventTypeToggleLabel();
+    }
+
+    updateEventTypes() {
+      this.selectedEventTypes = Array.from(this.eventTypeStack.querySelectorAll('input:checked')).map(function(i) { return i.value; });
+      this.syncEventTypeToggleLabel();
+    }
+
+    syncEventTypeToggleLabel() {
+      var allOn = this.selectedEventTypes.length === FORZA_DATA.disciplines.length;
+      this.btnToggleEventTypes.textContent = allOn ? 'Alle abwaehlen' : 'Alle auswaehlen';
+    }
+
     // --- CLASSES ---
     renderClasses() {
       var self = this;
@@ -1106,11 +1174,16 @@
         this.toast('Bitte mindestens eine Klasse waehlen');
         return;
       }
+      if (this.chkEvent.checked && this.selectedEventTypes.length === 0) {
+        this.toast('Bitte mindestens einen Event-Typ waehlen');
+        return;
+      }
 
       var players = lobby.players.length > 0 ? lobby.players : ['Spieler 1'];
       var opts = {
         mode: this.mode,
         selectedClasses: this.selectedClasses.slice(),
+        selectedEventTypes: this.selectedEventTypes.slice(),
         stageCount: this.stageCount,
         trackSource: this.trackSource,
         selectedCountries: this.selectedCountries,
