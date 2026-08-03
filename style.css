@@ -534,6 +534,40 @@ body {
 }
 .check-item input { accent-color: var(--accent); width: 13px; height: 13px; }
 
+/* --- Event Type Grid (same layout as countries) --- */
+.event-type-chk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-xs);
+  padding: 5px 7px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--text-3);
+  transition: all 0.12s ease;
+  user-select: none;
+}
+.event-type-chk:hover { border-color: var(--border-subtle); color: var(--text-2); }
+.event-type-chk input { accent-color: var(--accent); width: 13px; height: 13px; flex-shrink: 0; }
+.event-type-chk .event-type-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.event-type-chk .event-type-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: var(--text-3);
+}
+.event-type-chk:hover .event-type-icon {
+  color: var(--accent);
+}
+
 /* ==========================================================================
    CENTER PANEL — OUTPUT
    ========================================================================== */
