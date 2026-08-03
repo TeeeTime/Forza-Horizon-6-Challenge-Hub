@@ -613,6 +613,7 @@
       this.historyList = document.getElementById('history-list');
       this.idleScreen = document.getElementById('idle-screen');
       this.resultsArea = document.getElementById('results-area');
+      this.eventPath = document.getElementById('event-path');
       this.resultsGrid = document.getElementById('results-grid');
       this.quickResult = document.getElementById('quick-result');
       this.quickResultLabel = document.getElementById('quick-result-label');
@@ -851,6 +852,12 @@
         overlay.addEventListener('click', function(e) {
           if (e.target === overlay) overlay.classList.add('hidden');
         });
+      });
+
+      var resizeTimer = null;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() { self.syncEventPathLinks(); }, 80);
       });
     }
 
@@ -1227,6 +1234,9 @@
     // --- RENDER TELEMETRY CARDS ---
     renderTelemetry(results) {
       var self = this;
+      var sharedStages = (results[0] && results[0].challenge && results[0].challenge.stages) || [];
+      this.renderEventPath(sharedStages);
+
       this.resultsGrid.innerHTML = results.map(function(r) {
         var c = r.challenge;
         var pIdx = r.playerIndex !== undefined ? r.playerIndex : 0;
@@ -1291,30 +1301,112 @@
         }
 
         html += '</div>'; // close spec-grid
-
-        // Stages / Events
-        if (c.stages && c.stages.length > 0) {
-          html += '<div class="stages-wrap">';
-          html += '<span class="stages-label">' + (c.stages.length > 1 ? 'Cup Etappen (' + c.stages.length + ' Events)' : 'Renn-Strecke') + '</span>';
-
-          c.stages.forEach(function(st) {
-            var icon = getEventTypeIconMarkup(st.typeLabel);
-            html += '<div class="event-block">';
-            html += '<div class="event-block-top">';
-            html += '<span class="ev-name">' + icon + (c.stages.length > 1 ? 'Etappe ' + st.stageNum + ': ' : '') + self.escape(st.name) + '</span>';
-            html += '<span class="ev-type">' + self.escape(st.typeLabel || '') + '</span>';
-            html += '</div>';
-            html += '<div class="ev-track">' + self.escape(st.trackName) + '</div>';
-            if (st.mapRegion) { html += '<div class="ev-region">Region: ' + self.escape(st.mapRegion) + '</div>'; }
-            html += '</div>';
-          });
-
-          html += '</div>';
-        }
-
         html += '</div>'; // close tele-card
         return html;
       }).join('');
+    }
+
+    renderEventPath(stages) {
+      if (!stages || stages.length === 0) {
+        this.eventPath.classList.add('hidden');
+        this.eventPath.innerHTML = '';
+        return;
+      }
+
+      var self = this;
+      var multi = stages.length > 1;
+      var html = '<div class="event-path-head">';
+      html += '<span class="stages-label">' + (multi ? 'Cup Etappen (' + stages.length + ' Events)' : 'Renn-Strecke') + '</span>';
+      html += '</div>';
+      html += '<div class="event-path-list' + (multi ? '' : ' is-single') + '">';
+
+      stages.forEach(function(st, idx) {
+        var side = idx % 2 === 0 ? 'is-left' : 'is-right';
+        var icon = getEventTypeIconMarkup(st.typeLabel);
+        var isLast = idx === stages.length - 1;
+
+        html += '<div class="event-path-step ' + side + '">';
+        html += '<div class="event-block">';
+        html += '<div class="event-block-top">';
+        html += '<span class="ev-name">' + icon + (multi ? 'Etappe ' + st.stageNum + ': ' : '') + self.escape(st.name) + '</span>';
+        html += '<span class="ev-type">' + self.escape(st.typeLabel || '') + '</span>';
+        html += '</div>';
+        html += '<div class="ev-track">' + self.escape(st.trackName) + '</div>';
+        if (st.mapRegion) { html += '<div class="ev-region">Region: ' + self.escape(st.mapRegion) + '</div>'; }
+        html += '</div>';
+        html += '</div>';
+
+        if (!isLast) {
+          html += '<div class="event-path-link" aria-hidden="true">';
+          html += '<svg focusable="false">';
+          html += '<path d=""/>';
+          html += '</svg>';
+          html += '</div>';
+        }
+      });
+
+      html += '</div>';
+      this.eventPath.innerHTML = html;
+      this.eventPath.classList.remove('hidden');
+      if (multi) {
+        var selfPath = this;
+        requestAnimationFrame(function() { selfPath.syncEventPathLinks(); });
+      }
+    }
+
+    syncEventPathLinks() {
+      var list = this.eventPath.querySelector('.event-path-list');
+      if (!list || list.classList.contains('is-single')) return;
+
+      var steps = list.querySelectorAll('.event-path-step');
+      var links = list.querySelectorAll('.event-path-link');
+      var listRect = list.getBoundingClientRect();
+      if (listRect.width <= 0) return;
+
+      // Match event-block corner radius (--r-sm)
+      var styles = getComputedStyle(document.documentElement);
+      var cornerR = parseFloat(styles.getPropertyValue('--r-sm')) || 6;
+
+      for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        var svg = link.querySelector('svg');
+        var path = link.querySelector('path');
+        if (!svg || !path) continue;
+
+        var w = link.clientWidth;
+        var h = link.clientHeight;
+        if (w <= 0 || h <= 0) continue;
+
+        var a = steps[i].getBoundingClientRect();
+        var b = steps[i + 1].getBoundingClientRect();
+        var x0 = (a.left + a.width / 2) - listRect.left;
+        var x1 = (b.left + b.width / 2) - listRect.left;
+        var midY = h / 2;
+        var r = Math.min(cornerR, Math.abs(x1 - x0) / 2, midY - 1, h - midY - 1);
+        if (r < 1) r = 1;
+
+        var d;
+        if (x1 >= x0) {
+          // Down → right → down (rounded corners)
+          d = 'M ' + x0 + ' 0' +
+            ' L ' + x0 + ' ' + (midY - r) +
+            ' A ' + r + ' ' + r + ' 0 0 0 ' + (x0 + r) + ' ' + midY +
+            ' L ' + (x1 - r) + ' ' + midY +
+            ' A ' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + (midY + r) +
+            ' L ' + x1 + ' ' + h;
+        } else {
+          // Down → left → down (rounded corners)
+          d = 'M ' + x0 + ' 0' +
+            ' L ' + x0 + ' ' + (midY - r) +
+            ' A ' + r + ' ' + r + ' 0 0 1 ' + (x0 - r) + ' ' + midY +
+            ' L ' + (x1 + r) + ' ' + midY +
+            ' A ' + r + ' ' + r + ' 0 0 0 ' + x1 + ' ' + (midY + r) +
+            ' L ' + x1 + ' ' + h;
+        }
+
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        path.setAttribute('d', d);
+      }
     }
 
     // --- HISTORY ---
@@ -1346,6 +1438,16 @@
       var text = 'FORZA HORIZON 6 CHALLENGE\n';
       text += '====================================\n';
 
+      var sharedStages = (this.lastSession[0] && this.lastSession[0].challenge && this.lastSession[0].challenge.stages) || [];
+      if (sharedStages.length > 0) {
+        text += 'STRECKEN:\n';
+        sharedStages.forEach(function(st) {
+          text += '  - Etappe ' + st.stageNum + ': ' + st.trackName + '\n';
+          if (st.mapRegion) { text += '    [Region: ' + st.mapRegion + ']\n'; }
+        });
+        text += '------------------------------------\n';
+      }
+
       this.lastSession.forEach(function(r) {
         var c = r.challenge;
         text += 'SPIELER: ' + r.player + '\n';
@@ -1357,14 +1459,6 @@
         if (c.weather) text += 'WETTER: ' + c.weather.name + ' (' + c.weather.desc + ')\n';
         if (c.tires) text += 'REIFEN: ' + c.tires.name + ' (' + c.tires.desc + ')\n';
         if (c.assists) text += 'ASSISTS: ' + c.assists.name + ' (' + c.assists.desc + ')\n';
-
-        if (c.stages && c.stages.length > 0) {
-          text += 'STRECKEN:\n';
-          c.stages.forEach(function(st) {
-            text += '  - Etappe ' + st.stageNum + ': ' + st.trackName + '\n';
-            if (st.mapRegion) { text += '    [Region: ' + st.mapRegion + ']\n'; }
-          });
-        }
         text += '------------------------------------\n';
       });
 
